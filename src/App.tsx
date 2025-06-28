@@ -39,28 +39,63 @@ function getLevelParams(level: number, type: MathType) {
   }
 }
 
+function getMathTypeIcon(type: MathType) {
+  switch (type) {
+    case '덧셈': return '➕';
+    case '뺄셈': return '➖';
+    case '곱셈': return '✖️';
+    case '나눗셈': return '➗';
+    case '기하학': return '📐';
+    case '분수': return '🔢';
+    case '시간': return '⏰';
+    case '도량형': return '📏';
+    case '소수점': return '🔢';
+    default: return '❓';
+  }
+}
+
+function getMathTypeColor(type: MathType) {
+  switch (type) {
+    case '덧셈': return '#4CAF50';
+    case '뺄셈': return '#F44336';
+    case '곱셈': return '#2196F3';
+    case '나눗셈': return '#FF9800';
+    case '기하학': return '#9C27B0';
+    case '분수': return '#E91E63';
+    case '시간': return '#607D8B';
+    case '도량형': return '#795548';
+    case '소수점': return '#00BCD4';
+    default: return '#757575';
+  }
+}
+
 function generateQuestion(type: MathType, level: number) {
   const { min, max } = getLevelParams(level, type);
   let a = Math.floor(Math.random() * (max - min + 1)) + min;
   let b = Math.floor(Math.random() * (max - min + 1)) + min;
   let question = '';
   let answer = 0;
+  let visualElement = '';
   
   if (type === '덧셈') {
     question = `${a} + ${b}`;
     answer = a + b;
+    visualElement = `🍎 ${a}개 + 🍎 ${b}개 = 🍎 ?개`;
   } else if (type === '뺄셈') {
     if (a < b) [a, b] = [b, a];
     question = `${a} - ${b}`;
     answer = a - b;
+    visualElement = `🍎 ${a}개 - 🍎 ${b}개 = 🍎 ?개`;
   } else if (type === '곱셈') {
     question = `${a} × ${b}`;
     answer = a * b;
+    visualElement = `${a}개씩 ${b}묶음 = ?개`;
   } else if (type === '나눗셈') {
     b = Math.floor(Math.random() * (max - min + 1)) + min;
     answer = Math.floor(Math.random() * (max - min + 1)) + min;
     a = b * answer;
     question = `${a} ÷ ${b}`;
+    visualElement = `${a}개를 ${b}개씩 나누면 ?묶음`;
   } else if (type === '기하학') {
     const shapes = ['정사각형', '직사각형', '삼각형'];
     const shape = shapes[Math.floor(Math.random() * shapes.length)];
@@ -69,16 +104,19 @@ function generateQuestion(type: MathType, level: number) {
       const side = a;
       question = `한 변의 길이가 ${side}cm인 정사각형의 넓이는?`;
       answer = side * side;
+      visualElement = `⬜ ${side}cm × ${side}cm = ?cm²`;
     } else if (shape === '직사각형') {
       const width = a;
       const height = b;
       question = `가로 ${width}cm, 세로 ${height}cm인 직사각형의 넓이는?`;
       answer = width * height;
+      visualElement = `⬜ ${width}cm × ${height}cm = ?cm²`;
     } else if (shape === '삼각형') {
       const base = a;
       const height = b;
       question = `밑변 ${base}cm, 높이 ${height}cm인 삼각형의 넓이는?`;
       answer = Math.floor((base * height) / 2);
+      visualElement = `🔺 밑변 ${base}cm, 높이 ${height}cm = ?cm²`;
     }
   } else if (type === '분수') {
     const operations = ['덧셈', '뺄셈'];
@@ -90,6 +128,7 @@ function generateQuestion(type: MathType, level: number) {
       const num2 = Math.floor(Math.random() * (denom - 1)) + 1;
       question = `${num1}/${denom} + ${num2}/${denom}`;
       answer = num1 + num2;
+      visualElement = `🍕 ${num1}조각 + 🍕 ${num2}조각 = 🍕 ?조각`;
     } else {
       const denom = Math.floor(Math.random() * 8) + 2; // 2~9
       let num1 = Math.floor(Math.random() * (denom - 1)) + 1;
@@ -97,6 +136,7 @@ function generateQuestion(type: MathType, level: number) {
       if (num1 < num2) [num1, num2] = [num2, num1];
       question = `${num1}/${denom} - ${num2}/${denom}`;
       answer = num1 - num2;
+      visualElement = `🍕 ${num1}조각 - 🍕 ${num2}조각 = 🍕 ?조각`;
     }
   } else if (type === '시간') {
     const timeTypes = ['시계읽기', '시간계산'];
@@ -107,6 +147,7 @@ function generateQuestion(type: MathType, level: number) {
       const minute = Math.floor(Math.random() * 60);
       question = `${hour}시 ${minute}분은 몇 분일까요?`;
       answer = hour * 60 + minute;
+      visualElement = `🕐 ${hour}시 ${minute}분 = ?분`;
     } else {
       const hour1 = Math.floor(Math.random() * 12) + 1;
       const minute1 = Math.floor(Math.random() * 60);
@@ -117,9 +158,11 @@ function generateQuestion(type: MathType, level: number) {
       if (time1 < time2) {
         question = `${hour1}시 ${minute1}분부터 ${hour2}시 ${minute2}분까지 몇 분일까요?`;
         answer = time2 - time1;
+        visualElement = `🕐 ${hour1}:${minute1} → ${hour2}:${minute2} = ?분`;
       } else {
         question = `${hour2}시 ${minute2}분부터 ${hour1}시 ${minute1}분까지 몇 분일까요?`;
         answer = time1 - time2;
+        visualElement = `🕐 ${hour2}:${minute2} → ${hour1}:${minute1} = ?분`;
       }
     }
   } else if (type === '도량형') {
@@ -130,10 +173,12 @@ function generateQuestion(type: MathType, level: number) {
       const cm = Math.floor(Math.random() * 1000) + 1;
       question = `${cm}cm는 몇 m일까요?`;
       answer = Math.floor(cm / 100);
+      visualElement = `📏 ${cm}cm = ?m`;
     } else {
       const g = Math.floor(Math.random() * 1000) + 1;
       question = `${g}g는 몇 kg일까요?`;
       answer = Math.floor(g / 1000);
+      visualElement = `⚖️ ${g}g = ?kg`;
     }
   } else if (type === '소수점') {
     const operations = ['덧셈', '뺄셈'];
@@ -145,15 +190,18 @@ function generateQuestion(type: MathType, level: number) {
     if (operation === '덧셈') {
       question = `${num1} + ${num2}`;
       answer = Math.round((parseFloat(num1) + parseFloat(num2)) * 10) / 10;
+      visualElement = `💰 ${num1}원 + ${num2}원 = ?원`;
     } else {
       const n1 = parseFloat(num1);
       const n2 = parseFloat(num2);
       if (n1 < n2) {
         question = `${num2} - ${num1}`;
         answer = Math.round((n2 - n1) * 10) / 10;
+        visualElement = `💰 ${num2}원 - ${num1}원 = ?원`;
       } else {
         question = `${num1} - ${num2}`;
         answer = Math.round((n1 - n2) * 10) / 10;
+        visualElement = `💰 ${num1}원 - ${num2}원 = ?원`;
       }
     }
   }
@@ -169,6 +217,7 @@ function generateQuestion(type: MathType, level: number) {
     question,
     answer,
     choices: Array.from(choices).sort(() => Math.random() - 0.5),
+    visualElement,
   };
 }
 
@@ -417,8 +466,13 @@ function App() {
                   key={type}
                   className={`type-btn${mathType === type ? ' selected' : ''}`}
                   onClick={() => setMathType(type)}
+                  style={{
+                    backgroundColor: mathType === type ? getMathTypeColor(type) : '#f0f0f0',
+                    color: mathType === type ? 'white' : '#333',
+                    border: `2px solid ${getMathTypeColor(type)}`,
+                  }}
                 >
-                  {type}
+                  {getMathTypeIcon(type)} {type}
                 </button>
               ))}
             </div>
@@ -444,7 +498,17 @@ function App() {
               <div className="timer-inner" style={{width: `${(timeLeft/TIME_LIMIT)*100}%`}} />
               <span className={`timer-text${timeLeft <= 3 ? ' danger' : ''}`}>⏰ {timeLeft}초</span>
             </div>
-            <div className="question">Q{questionNum}. {questionObj.question} = ?</div>
+            <div className="question">
+              <div className="question-header">
+                <span className="question-icon">{getMathTypeIcon(mathType || '덧셈')}</span>
+                <span className="question-number">Q{questionNum}. {questionObj.question} = ?</span>
+              </div>
+              {questionObj.visualElement && (
+                <div className="visual-element">
+                  {questionObj.visualElement}
+                </div>
+              )}
+            </div>
             <div className="choices">
               {questionObj.choices.map((c, i) => (
                 <button

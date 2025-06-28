@@ -299,6 +299,7 @@ function App() {
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const [bestScore, setBestScoreState] = useState(getBestScore());
   const [newBest, setNewBest] = useState(false);
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
 
   useEffect(() => {
     if (started && !feedback && !gameOver) {
@@ -373,6 +374,7 @@ function App() {
     setMaxCombo(0);
     setComboEffect(false);
     setFastAnswers(0);
+    setShowQuitConfirm(false);
     playSound('levelup');
   };
 
@@ -438,6 +440,49 @@ function App() {
     }
   };
 
+  const quitGame = () => {
+    setShowQuitConfirm(true);
+  };
+
+  const confirmQuit = () => {
+    setStarted(false);
+    setGameOver(false);
+    setScore(0);
+    setLevel(1);
+    setQuestionNum(1);
+    setCombo(0);
+    setMaxCombo(0);
+    setFastAnswers(0);
+    setShowQuitConfirm(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      bgmRef.current.currentTime = 0;
+    }
+  };
+
+  const cancelQuit = () => {
+    setShowQuitConfirm(false);
+  };
+
+  const goToStart = () => {
+    setStarted(false);
+    setGameOver(false);
+    setScore(0);
+    setLevel(1);
+    setQuestionNum(1);
+    setCombo(0);
+    setMaxCombo(0);
+    setFastAnswers(0);
+    setMathType(null);
+    setShowQuitConfirm(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      bgmRef.current.currentTime = 0;
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -481,7 +526,17 @@ function App() {
         ) : null}
         {started && !gameOver && (
           <div className="game-area">
-            <div className="score">점수: <b>{score}</b> / {TOTAL_QUESTIONS}</div>
+            <div className="game-header">
+              <div className="score">점수: <b>{score}</b> / {TOTAL_QUESTIONS}</div>
+              <div className="game-controls">
+                <button className="control-btn quit-btn" onClick={quitGame}>
+                  🚪 그만두기
+                </button>
+                <button className="control-btn restart-btn" onClick={goToStart}>
+                  🏠 처음으로
+                </button>
+              </div>
+            </div>
             <div className="level-area">
               <span className={`level-badge${levelUp ? ' levelup' : ''}`}>Lv.{level}</span>
               {levelUp && <span className="levelup-msg">레벨업! 🚀</span>}
@@ -559,7 +614,19 @@ function App() {
                 <span className="badge none">아직 업적이 없어요! 도전해보세요!</span>
               )}
             </div>
-            <button className="App-start-btn" onClick={startGame}>다시하기</button>
+            <div className="game-over-controls">
+              <button className="App-start-btn" onClick={startGame}>다시하기</button>
+              <button className="control-btn restart-btn" onClick={goToStart}>🏠 처음으로</button>
+            </div>
+          </div>
+        )}
+        {showQuitConfirm && (
+          <div className="quit-confirm">
+            <div className="confirm-content">
+              <p>게임을 종료하시겠습니까?</p>
+              <button onClick={confirmQuit}>예</button>
+              <button onClick={cancelQuit}>아니오</button>
+            </div>
           </div>
         )}
       </header>

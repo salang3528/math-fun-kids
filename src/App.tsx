@@ -17,7 +17,7 @@ function getRandomEmoji(type: 'correct' | 'wrong' | 'timeout' | 'combo') {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-type MathType = '덧셈' | '뺄셈' | '곱셈' | '나눗셈';
+type MathType = '덧셈' | '뺄셈' | '곱셈' | '나눗셈' | '기하학' | '분수' | '시간' | '도량형' | '소수점';
 
 function getLevelParams(level: number, type: MathType) {
   // 레벨에 따라 숫자 범위와 곱셈/나눗셈 난이도 증가
@@ -25,6 +25,11 @@ function getLevelParams(level: number, type: MathType) {
     return {
       min: 1 + Math.floor(level / 2),
       max: 10 + level * 2,
+    };
+  } else if (type === '기하학' || type === '분수' || type === '시간' || type === '도량형' || type === '소수점') {
+    return {
+      min: 1 + Math.floor(level / 3),
+      max: 10 + level,
     };
   } else {
     return {
@@ -40,6 +45,7 @@ function generateQuestion(type: MathType, level: number) {
   let b = Math.floor(Math.random() * (max - min + 1)) + min;
   let question = '';
   let answer = 0;
+  
   if (type === '덧셈') {
     question = `${a} + ${b}`;
     answer = a + b;
@@ -55,12 +61,108 @@ function generateQuestion(type: MathType, level: number) {
     answer = Math.floor(Math.random() * (max - min + 1)) + min;
     a = b * answer;
     question = `${a} ÷ ${b}`;
+  } else if (type === '기하학') {
+    const shapes = ['정사각형', '직사각형', '삼각형'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+    
+    if (shape === '정사각형') {
+      const side = a;
+      question = `한 변의 길이가 ${side}cm인 정사각형의 넓이는?`;
+      answer = side * side;
+    } else if (shape === '직사각형') {
+      const width = a;
+      const height = b;
+      question = `가로 ${width}cm, 세로 ${height}cm인 직사각형의 넓이는?`;
+      answer = width * height;
+    } else if (shape === '삼각형') {
+      const base = a;
+      const height = b;
+      question = `밑변 ${base}cm, 높이 ${height}cm인 삼각형의 넓이는?`;
+      answer = Math.floor((base * height) / 2);
+    }
+  } else if (type === '분수') {
+    const operations = ['덧셈', '뺄셈'];
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+    
+    if (operation === '덧셈') {
+      const denom = Math.floor(Math.random() * 8) + 2; // 2~9
+      const num1 = Math.floor(Math.random() * (denom - 1)) + 1;
+      const num2 = Math.floor(Math.random() * (denom - 1)) + 1;
+      question = `${num1}/${denom} + ${num2}/${denom}`;
+      answer = num1 + num2;
+    } else {
+      const denom = Math.floor(Math.random() * 8) + 2; // 2~9
+      let num1 = Math.floor(Math.random() * (denom - 1)) + 1;
+      let num2 = Math.floor(Math.random() * (denom - 1)) + 1;
+      if (num1 < num2) [num1, num2] = [num2, num1];
+      question = `${num1}/${denom} - ${num2}/${denom}`;
+      answer = num1 - num2;
+    }
+  } else if (type === '시간') {
+    const timeTypes = ['시계읽기', '시간계산'];
+    const timeType = timeTypes[Math.floor(Math.random() * timeTypes.length)];
+    
+    if (timeType === '시계읽기') {
+      const hour = Math.floor(Math.random() * 12) + 1;
+      const minute = Math.floor(Math.random() * 60);
+      question = `${hour}시 ${minute}분은 몇 분일까요?`;
+      answer = hour * 60 + minute;
+    } else {
+      const hour1 = Math.floor(Math.random() * 12) + 1;
+      const minute1 = Math.floor(Math.random() * 60);
+      const hour2 = Math.floor(Math.random() * 12) + 1;
+      const minute2 = Math.floor(Math.random() * 60);
+      const time1 = hour1 * 60 + minute1;
+      const time2 = hour2 * 60 + minute2;
+      if (time1 < time2) {
+        question = `${hour1}시 ${minute1}분부터 ${hour2}시 ${minute2}분까지 몇 분일까요?`;
+        answer = time2 - time1;
+      } else {
+        question = `${hour2}시 ${minute2}분부터 ${hour1}시 ${minute1}분까지 몇 분일까요?`;
+        answer = time1 - time2;
+      }
+    }
+  } else if (type === '도량형') {
+    const units = ['길이', '무게'];
+    const unit = units[Math.floor(Math.random() * units.length)];
+    
+    if (unit === '길이') {
+      const cm = Math.floor(Math.random() * 1000) + 1;
+      question = `${cm}cm는 몇 m일까요?`;
+      answer = Math.floor(cm / 100);
+    } else {
+      const g = Math.floor(Math.random() * 1000) + 1;
+      question = `${g}g는 몇 kg일까요?`;
+      answer = Math.floor(g / 1000);
+    }
+  } else if (type === '소수점') {
+    const operations = ['덧셈', '뺄셈'];
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+    
+    const num1 = (Math.random() * 10).toFixed(1);
+    const num2 = (Math.random() * 10).toFixed(1);
+    
+    if (operation === '덧셈') {
+      question = `${num1} + ${num2}`;
+      answer = Math.round((parseFloat(num1) + parseFloat(num2)) * 10) / 10;
+    } else {
+      const n1 = parseFloat(num1);
+      const n2 = parseFloat(num2);
+      if (n1 < n2) {
+        question = `${num2} - ${num1}`;
+        answer = Math.round((n2 - n1) * 10) / 10;
+      } else {
+        question = `${num1} - ${num2}`;
+        answer = Math.round((n1 - n2) * 10) / 10;
+      }
+    }
   }
+  
   const choices = new Set([answer]);
   while (choices.size < 4) {
     let delta = Math.floor(Math.random() * 7) - 3;
     let wrong = answer + delta;
-    if (type === '나눗셈' && wrong <= 0) wrong = answer + Math.abs(delta) + 1;
+    if (wrong <= 0) wrong = answer + Math.abs(delta) + 1;
     if (wrong !== answer) choices.add(wrong);
   }
   return {
@@ -310,7 +412,7 @@ function App() {
             <p className="App-desc">재미있는 수학 암산 게임!<br/>문제를 풀고 점수를 모아보세요!</p>
             <div className="type-select">
               <span>문제 유형 선택: </span>
-              {(['덧셈','뺄셈','곱셈','나눗셈'] as MathType[]).map(type => (
+              {(['덧셈','뺄셈','곱셈','나눗셈','기하학','분수','시간','도량형','소수점'] as MathType[]).map(type => (
                 <button
                   key={type}
                   className={`type-btn${mathType === type ? ' selected' : ''}`}

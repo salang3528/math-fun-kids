@@ -101,19 +101,19 @@ function generateQuestion(type: MathType, level: number) {
     const shape = shapes[Math.floor(Math.random() * shapes.length)];
     
     if (shape === '정사각형') {
-      const side = a;
+      const side = Math.floor(Math.random() * 10) + 1; // 1~10
       question = `한 변의 길이가 ${side}cm인 정사각형의 넓이는?`;
       answer = side * side;
       visualElement = `⬜ ${side}cm × ${side}cm = ?cm²`;
     } else if (shape === '직사각형') {
-      const width = a;
-      const height = b;
+      const width = Math.floor(Math.random() * 8) + 2; // 2~9
+      const height = Math.floor(Math.random() * 8) + 2; // 2~9
       question = `가로 ${width}cm, 세로 ${height}cm인 직사각형의 넓이는?`;
       answer = width * height;
       visualElement = `⬜ ${width}cm × ${height}cm = ?cm²`;
     } else if (shape === '삼각형') {
-      const base = a;
-      const height = b;
+      const base = Math.floor(Math.random() * 8) + 2; // 2~9
+      const height = Math.floor(Math.random() * 8) + 2; // 2~9
       question = `밑변 ${base}cm, 높이 ${height}cm인 삼각형의 넓이는?`;
       answer = Math.floor((base * height) / 2);
       visualElement = `🔺 밑변 ${base}cm, 높이 ${height}cm = ?cm²`;
@@ -123,14 +123,14 @@ function generateQuestion(type: MathType, level: number) {
     const operation = operations[Math.floor(Math.random() * operations.length)];
     
     if (operation === '덧셈') {
-      const denom = Math.floor(Math.random() * 8) + 2; // 2~9
+      const denom = Math.floor(Math.random() * 6) + 3; // 3~8
       const num1 = Math.floor(Math.random() * (denom - 1)) + 1;
       const num2 = Math.floor(Math.random() * (denom - 1)) + 1;
       question = `${num1}/${denom} + ${num2}/${denom}`;
       answer = num1 + num2;
       visualElement = `🍕 ${num1}조각 + 🍕 ${num2}조각 = 🍕 ?조각`;
     } else {
-      const denom = Math.floor(Math.random() * 8) + 2; // 2~9
+      const denom = Math.floor(Math.random() * 6) + 3; // 3~8
       let num1 = Math.floor(Math.random() * (denom - 1)) + 1;
       let num2 = Math.floor(Math.random() * (denom - 1)) + 1;
       if (num1 < num2) [num1, num2] = [num2, num1];
@@ -170,12 +170,12 @@ function generateQuestion(type: MathType, level: number) {
     const unit = units[Math.floor(Math.random() * units.length)];
     
     if (unit === '길이') {
-      const cm = Math.floor(Math.random() * 1000) + 1;
+      const cm = Math.floor(Math.random() * 900) + 100; // 100~999
       question = `${cm}cm는 몇 m일까요?`;
       answer = Math.floor(cm / 100);
       visualElement = `📏 ${cm}cm = ?m`;
     } else {
-      const g = Math.floor(Math.random() * 1000) + 1;
+      const g = Math.floor(Math.random() * 900) + 100; // 100~999
       question = `${g}g는 몇 kg일까요?`;
       answer = Math.floor(g / 1000);
       visualElement = `⚖️ ${g}g = ?kg`;
@@ -184,8 +184,9 @@ function generateQuestion(type: MathType, level: number) {
     const operations = ['덧셈', '뺄셈'];
     const operation = operations[Math.floor(Math.random() * operations.length)];
     
-    const num1 = (Math.random() * 10).toFixed(1);
-    const num2 = (Math.random() * 10).toFixed(1);
+    // 더 간단한 소수점 숫자들로 변경
+    const num1 = (Math.floor(Math.random() * 50) / 10).toFixed(1); // 0.0~4.9
+    const num2 = (Math.floor(Math.random() * 50) / 10).toFixed(1); // 0.0~4.9
     
     if (operation === '덧셈') {
       question = `${num1} + ${num2}`;
@@ -210,7 +211,30 @@ function generateQuestion(type: MathType, level: number) {
   while (choices.size < 4) {
     let delta = Math.floor(Math.random() * 7) - 3;
     let wrong = answer + delta;
-    if (wrong <= 0) wrong = answer + Math.abs(delta) + 1;
+    
+    // 각 연산 유형에 맞는 선택지 생성
+    if (type === '기하학') {
+      // 넓이 문제는 양수여야 함
+      if (wrong <= 0) wrong = answer + Math.abs(delta) + 1;
+    } else if (type === '분수') {
+      // 분수 문제는 분자만 계산하므로 양수
+      if (wrong <= 0) wrong = answer + Math.abs(delta) + 1;
+    } else if (type === '시간') {
+      // 시간은 양수여야 함
+      if (wrong <= 0) wrong = answer + Math.abs(delta) + 1;
+    } else if (type === '도량형') {
+      // 단위 변환은 양수여야 함
+      if (wrong <= 0) wrong = answer + Math.abs(delta) + 1;
+    } else if (type === '소수점') {
+      // 소수점은 더 작은 범위로
+      delta = Math.floor(Math.random() * 5) - 2;
+      wrong = Math.round((answer + delta * 0.1) * 10) / 10;
+      if (wrong <= 0) wrong = Math.round((answer + 0.5) * 10) / 10;
+    } else {
+      // 기본 사칙연산
+      if (wrong <= 0) wrong = answer + Math.abs(delta) + 1;
+    }
+    
     if (wrong !== answer) choices.add(wrong);
   }
   return {
